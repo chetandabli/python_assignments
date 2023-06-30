@@ -116,3 +116,25 @@ def fizzBizz():
 fizzBizz()
 
 # 8
+file = open("input.txt", "r")
+content = file.read()
+print(content)
+letnth = len(content.split(" "))
+newfile = open("output.txt", "w")
+newfile.write("Number of words: {}".format(letnth))
+
+# 9
+def devide(devisitio, devider):
+    class zeroError(Exception):
+        def __init__(self, message):
+            self.message = message
+    try:
+        if devider == 0:
+            raise zeroError("input devider as Zero is not valid")
+        else:
+            print(devisitio/devider)
+    except zeroError as e:
+        print("zero error: ", e.message)
+
+devide(10, 0)
+    
