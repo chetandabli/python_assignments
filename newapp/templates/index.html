@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CRUD Operations</title>
+</head>
+<body>
+    <h1>CRUD Operations</h1>
+
+    <h2>Create</h2>
+    <form id="create-form">
+        <input type="text" id="key-input" placeholder="Key">
+        <input type="text" id="value-input" placeholder="Value">
+        <button type="submit">Create</button>
+    </form>
+
+    <h2>Read</h2>
+    <button id="read-btn">Read</button>
+    <div id="read-result"></div>
+
+    <h2>Update</h2>
+    <form id="update-form">
+        <input type="text" id="update-key-input" placeholder="Key">
+        <input type="text" id="update-value-input" placeholder="Value">
+        <button type="submit">Update</button>
+    </form>
+
+    <h2>Delete</h2>
+    <form id="delete-form">
+        <input type="text" id="delete-key-input" placeholder="Key">
+        <button type="submit">Delete</button>
+    </form>
+
+    <script>
+        // Create operation
+        document.getElementById('create-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var key = document.getElementById('key-input').value;
+            var value = document.getElementById('value-input').value;
+
+            fetch('/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({[key]: value})
+            })
+            .then(response => response.text())
+            .then(data => {
+                alert(data);
+                document.getElementById('key-input').value = '';
+                document.getElementById('value-input').value = '';
+            });
+        });
+
+        // Read operation
+        document.getElementById('read-btn').addEventListener('click', function() {
+            fetch('/read')
+            .then(response => response.json())
+            .then(data => {
+                var readResult = document.getElementById('read-result');
+                readResult.innerHTML = '';
+
+                for (var key in data) {
+                    var div = document.createElement('div');
+                    div.textContent = key + ': ' + data[key];
+                    readResult.appendChild(div);
+                }
+            });
+        });
+
+        // Update operation
+        document.getElementById('update-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var key = document.getElementById('update-key-input').value;
+            var value = document.getElementById('update-value-input').value;
+
+            fetch('/update', {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({[key]: value})
+            })
+            .then(response => response.text())
+            .then(data => {
+                alert(data);
+                document.getElementById('update-key-input').value = '';
+                document.getElementById('update-value-input').value = '';
+            });
+        });
+
+        // Delete operation
+        document.getElementById('delete-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var key = document.getElementById('delete-key-input').value;
+
+            fetch('/delete/' + key, {
+                method: 'DELETE'
+            })
+            .then(response => response.text())
+            .then(data => {
+                alert(data);
+                document.getElementById('delete-key-input').value = '';
+            });
+        });
+    </script>
+</body>
+</html>
