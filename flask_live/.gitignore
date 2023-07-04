@@ -1,0 +1,30 @@
+# Python
+*.pyc
+__pycache__/
+
+# Virtual environment
+.venv/
+
+# IDE and editor files
+.idea/
+.vscode/
+
+# Flask specific
+instance/
+*.sqlite
+
+# Log files
+*.log
+
+# Compiled files
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.dll
+*.exe
+*.out
+
+# Miscellaneous
+.DS_Store
+Thumbs.db
