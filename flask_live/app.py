@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, json
+from flask import Flask, request, jsonify, render_template
 
 app = Flask(__name__)
 
@@ -95,7 +95,13 @@ orders_id = 1
 @app.route('/')
 def index():
     dist = [dish.__dict__() for dish in restaurant.check_inventory()]
-    return jsonify(dist)
+    # return jsonify(dist)
+    return render_template('index.html', inventory = dist)
+@app.route('/data')
+def data():
+    res = restaurant.orders
+    dist = [dish.__dict__() for dish in restaurant.check_inventory()]
+    return jsonify(dist, res)
 
 @app.route("/postdish", methods=['POST'])
 def post():
