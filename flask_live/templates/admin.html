@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Restaurant Management</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+    }
+
+    .container {
+      min-width: 90vw;
+      padding: 20px;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border-radius: 5px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      margin-top: 30px;
+    }
+
+    form {
+      margin-top: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: #fff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    #inventory {
+      margin-top: 20px;
+    }
+
+    #inventory > div {
+      margin-bottom: 5px;
+      padding: 10px;
+      background-color: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    #orders {
+      margin-top: 20px;
+    }
+
+    #orders > div {
+      margin-bottom: 5px;
+      padding: 10px;
+      background-color: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .listofdishes{
+        display: flex;
+        justify-content: space-between;
+    }
+    .listofdishes>strong{
+        padding-right: 5px;
+    }
+
+    .order-item {
+  margin-bottom: 10px;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.status-container {
+  margin-top: 5px;
+}
+
+.status-container select {
+  width: 100%;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Restaurant Management Admin Panel</h1>
+
+    <h2>Inventory</h2>
+    <div id="inventory"></div>
+
+    <h2>Add Dish</h2>
+    <form id="addDishForm">
+      <label for="name">Name:</label>
+      <input type="text" id="name" name="name" required><br>
+      <label for="price">Price:</label>
+      <input type="number" id="price" name="price" step="0.01" required><br>
+      <label for="availability">Availability:</label>
+      <select id="availability" name="availability" required>
+        <option value="yes">Yes</option>
+        <option value="no">No</option>
+      </select><br>
+      <button type="submit">Add Dish</button>
+    </form>
+    <div id="orders"></div>
+  </div>
+
+  <script>
+    // Fetch and display the inventory
+    function fetchInventory() {
+      fetch('/data').then(response => response.json())
+        .then(data => {
+          var inventory = '';
+          data[0].forEach(dish => {
+  inventory += '<div class="listofdishes"><strong>' + dish.name + '</strong> - $' + dish.price + ' - Availability: ' + dish.availability + ' - id: ' + dish.id + ' ';
+  inventory += '<button onclick="deleteDish(' + dish.id + ')">Delete</button>';
+  inventory += '<button onclick="updateAvailability(' + dish.id + ', \'' + dish.availability + '\')">Update</button>';
+  inventory += '</div>';
+});
+          document.getElementById('inventory').innerHTML = inventory;
+        });
+    }
+
+    // Fetch and display the orders
+    function fetchOrders() {
+  fetch('/orders')
+    .then(response => response.json())
+    .then(data => {
+      var orders = '';
+      orders += '<h2>Orders List</h2>';
+      data.forEach(order => {
+        orders += '<div class="order-item">';
+        orders += '<div><strong>Dish:</strong> ' + order.name + ' - <strong>Price:</strong> $' + order.price + ' - <strong>Status:</strong> ' + order.status + "<strong> Customer Name:</strong> " + order.customer_name + '</div>';
+        orders += '<div class="status-container">';
+        orders += '<label for="status-' + order.id + '">Update Status:</label>';
+        orders += '<select id="status-' + order.id + '" name="status" onchange="updateOrderStatus(' + order.id + ', this.value)">';
+        orders += '<option value="received">Received</option>';
+        orders += '<option value="preparing">Preparing</option>';
+        orders += '<option value="delivered">Delivered</option>';
+        orders += '<option value="canceled">Canceled</option>';
+        orders += '</select>';
+        orders += '</div>';
+        orders += '</div>';
+      });
+      document.getElementById('orders').innerHTML = orders;
+    });
+}
+
+
+    // Add dish
+    document.getElementById('addDishForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var name = document.getElementById('name').value;
+      var price = document.getElementById('price').value;
+      var availability = document.getElementById('availability').value;
+      fetch('/postdish', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ "name": name, "price": price, "availability": availability })
+      }).then(response => {
+        if (response.ok) {
+          fetchInventory();
+          alert('Dish added to inventory.');
+        } else {
+          alert('Error adding dish.');
+        }
+      }).catch(error => {
+        alert('Error adding dish.');
+      });
+    });
+
+    // Update order status
+    function updateOrderStatus(orderId, status) {
+  fetch('/updateorders/' + orderId, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ "status": status })
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data === 'order status updated.') {
+        fetchOrders();
+        alert('Order status updated successfully.');
+      } else {
+        alert(data);
+      }
+    })
+    .catch(error => {
+      alert('Error updating order status.');
+    });
+}
+
+
+    // Delete dish
+function deleteDish(dishId) {
+  fetch('/delete/' + dishId, {
+    method: 'DELETE'
+  }).then(response => {
+    if (response.ok) {
+      fetchInventory();
+      alert('Dish deleted successfully.');
+    } else {
+      alert('Error deleting dish.');
+    }
+  }).catch(error => {
+    alert('Error deleting dish.');
+  });
+}
+
+// Update dish availability
+function updateAvailability(dishId, availability) {
+  var newAvailability = (availability === 'yes') ? 'no' : 'yes';
+  fetch('/update/' + dishId, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ "availability": newAvailability })
+  }).then(response => {
+    if (response.ok) {
+      fetchInventory();
+      alert('Dish availability updated successfully.');
+    } else {
+      alert('Error updating dish availability.');
+    }
+  }).catch(error => {
+    alert('Error updating dish availability.');
+  });
+}
+
+
+    // Initial fetch of inventory and orders
+    fetchInventory();
+    fetchOrders();
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+  <script type="text/javascript" charset="utf-8">
+      var socket = io();
+
+    socket.on('connect', function() {
+    const additionalData = {
+        // Add your additional details here
+        key1: "value1",
+        key2: "value2",
+        // ...
+    };
+
+    
+
+    socket.emit('connect_with_details', additionalData);
+});
+  </script>
+</body>
+</html>

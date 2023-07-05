@@ -6,21 +6,18 @@
     body {
       margin: 0;
       padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
       font-family: Arial, sans-serif;
       background-color: #f5f5f5;
     }
 
     .container {
-      min-width: 90vw;
+      display: flex;
+      justify-content: flex-start;
+      align-items: flex-start;
+      width: 100vw;
+      height: 100vh;
       padding: 20px;
-      background-color: #fff;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      border-radius: 5px;
+      box-sizing: border-box;
     }
 
     h1 {
@@ -32,180 +29,239 @@
       margin-top: 30px;
     }
 
-    form {
-      margin-top: 15px;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 5px;
-    }
-
-    input,
-    select {
-      width: 100%;
-      padding: 10px;
+    .inventory-item {
       margin-bottom: 10px;
-      border: 1px solid #ccc;
+      padding: 10px;
+      background-color: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      margin-right: 20px;
+      min-width: 300px; /* Set a fixed width for the inventory item */
+    }
+
+    .inventory-item > strong {
+      padding-right: 5px;
+    }
+
+    .inventory-item button {
+      margin-left: auto;
+      margin-right: 5px;
+      background-color: #4CAF50;
+      color: #fff;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      min-width: 100px; /* Set a fixed width for the buttons */
+    }
+
+    .inventory-item button:hover {
+      background-color: #45a049;
+    }
+    .disbtn {
+  /* CSS styles for the disabled button */
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+    /* .inventory-item .rating {
+      margin-left: auto;
+    }
+
+    .rating input[type="radio"] {
+      display: none;
+    }
+
+    .rating label {
+      display: inline-block;
+      cursor: pointer;
+    }
+
+    .rating label:before {
+      content: "\2605";
+      color: #ddd;
+    }
+
+    .rating input[type="radio"]:checked ~ label:before {
+      color: #ffca08;
+    } */
+
+    .order-item {
+      margin-bottom: 10px;
+      padding: 10px;
+      background-color: #f9f9f9;
+      border: 1px solid #ddd;
       border-radius: 4px;
     }
 
-    button {
+    .chatbox-container {
+      position: fixed;
+      right: 0px;
+      bottom: 0px;
+      width: 20%;
+      height: 100vh;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border-radius: 5px;
+    }
+
+    /* Chatbox Styles */
+    .chatbox-header {
+      padding: 10px;
       background-color: #4CAF50;
       color: #fff;
-      padding: 10px 20px;
+      border-top-left-radius: 5px;
+      border-top-right-radius: 5px;
+    }
+
+    .chatbox-body {
+      padding: 10px;
+      height: calc(100vh - 120px);
+      overflow-y: auto;
+    }
+
+    .chatbox-message {
+      margin-bottom: 10px;
+    }
+
+    .chatbox-input {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      border-top: 1px solid #ddd;
+    }
+
+    .chatbox-input input {
+      flex-grow: 1;
+      padding: 5px;
+      border: none;
+      border-radius: 4px;
+      margin-right: 10px;
+    }
+
+    .chatbox-input button {
+      background-color: #4CAF50;
+      color: #fff;
+      padding: 5px 10px;
       border: none;
       border-radius: 4px;
       cursor: pointer;
     }
-
-    button:hover {
+    h3{
+      text-align: center;
+    }
+    .chatbox-input button:hover {
       background-color: #45a049;
     }
+    
+    .rating {
+  display: flex;
+  align-items: center;
+  margin-top: 5px;
+}
 
-    #inventory {
-      margin-top: 20px;
-    }
+.rating input[type="radio"] {
+  display: none;
+}
 
-    #inventory > div {
-      margin-bottom: 5px;
-      padding: 10px;
-      background-color: #f9f9f9;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-    }
+.rating label {
+  display: inline-block;
+  cursor: pointer;
+  color: #ddd;
+}
 
-    #orders {
-      margin-top: 20px;
-    }
+.rating label:before {
+  content: "\2605";
+  color: #ddd;
+}
 
-    #orders > div {
-      margin-bottom: 5px;
-      padding: 10px;
-      background-color: #f9f9f9;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-    }
-    .listofdishes{
-        display: flex;
-        justify-content: space-between;
-    }
-    .listofdishes>strong{
-        padding-right: 5px;
-    }
+.rating input[type="radio"]:checked ~ label:before {
+  color: #ffca08;
+}
+
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Restaurant Management</h1>
-
-    <h2>Inventory</h2>
     <div id="inventory"></div>
-
-    <h2>Add Dish</h2>
-    <form id="addDishForm">
-      <label for="name">Name:</label>
-      <input type="text" id="name" name="name" required><br>
-      <label for="price">Price:</label>
-      <input type="number" id="price" name="price" step="0.01" required><br>
-      <label for="availability">Availability:</label>
-      <select id="availability" name="availability" required>
-        <option value="yes">Yes</option>
-        <option value="no">No</option>
-      </select><br>
-      <button type="submit">Add Dish</button>
-    </form>
-
-    <h2>Place Order</h2>
-    <form id="placeOrderForm">
-      <label for="dishId">Dish ID:</label>
-      <input type="number" id="dishId" name="dishId" required><br>
-      <label for="customerName">Customer Name:</label>
-      <input type="text" id="customerName" name="customerName" required><br>
-      <button type="submit">Place Order</button>
-    </form>
-
-    <h2>Update Order Status</h2>
-    <form id="updateOrderForm">
-      <label for="orderId">Order ID:</label>
-      <input type="number" id="orderId" name="orderId" required><br>
-      <label for="status">Status:</label>
-      <select id="status" name="status" required>
-        <option value="received">Received</option>
-        <option value="preparing">Preparing</option>
-        <option value="delivered">Delivered</option>
-        <option value="canceled">Canceled</option>
-      </select><br>
-      <button type="submit">Update Status</button>
-    </form>
-
-    <h2>Orders List</h2>
-    <div id="orders"></div>
+    <div id="orders" class="orders-list"></div>
+    <div class="chatbox-container">
+      <div class="chatbox-header">Chat</div>
+      <div class="chatbox-body">
+        <div class="chatbox-message">Welcome to our restaurant! How can we assist you today?</div>
+        <!-- Other chat messages will be dynamically added here -->
+      </div>
+      <div class="chatbox-input">
+        <input type="text" id="chatInput" placeholder="Type your message..." />
+        <button id="sendButton">Send</button>
+      </div>
+    </div>
   </div>
 
   <script>
     // Fetch and display the inventory
     function fetchInventory() {
-      fetch('/data').then(response => response.json())
+      fetch('/data')
+        .then(response => response.json())
         .then(data => {
           var inventory = '';
+          inventory += `<h3>Restaurant Inventory</h3>`
           data[0].forEach(dish => {
-  inventory += '<div class="listofdishes"><strong>' + dish.name + '</strong> - $' + dish.price + ' - Availability: ' + dish.availability + ' - id: ' + dish.id + ' ';
-  inventory += '<button onclick="deleteDish(' + dish.id + ')">Delete</button>';
-  inventory += '<button onclick="updateAvailability(' + dish.id + ', \'' + dish.availability + '\')">Update</button>';
-  inventory += '</div>';
-});
+            inventory += '<div class="inventory-item">';
+            inventory += '<strong>' + dish.name + '-> $' + dish.price + '</strong>';
+            if(dish.availability == "yes"){
+              inventory += '<button onclick="placeOrder(' + dish.id + ')">Buy</button>';
+            }else{
+              inventory += '<button disabled class="disbtn">Out of Stock</button>';
+            }
+            inventory += '<strong>Rating: </strong>' + 5;
+            inventory += '</div>';
+            inventory += '</div>';
+          });
           document.getElementById('inventory').innerHTML = inventory;
         });
     }
 
     // Fetch and display the orders
     function fetchOrders() {
-      fetch('/orders').then(response => response.json())
-        .then(data => {
-          var orders = '';
-          data.forEach(order => {
-            orders += '<div><strong>Order ID:</strong> ' + order.id + ' - <strong>Customer Name:</strong> ' + order.customer_name + ' - <strong>Dish:</strong> ' + order.name + ' - <strong>Price:</strong> $' + order.price + ' - <strong>Status:</strong> ' + order.status + '</div> ';
-          });
-          document.getElementById('orders').innerHTML = orders;
-        });
-    }
-
-    // Add dish
-    document.getElementById('addDishForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      var name = document.getElementById('name').value;
-      var price = document.getElementById('price').value;
-      var availability = document.getElementById('availability').value;
-      fetch('/postdish', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ "name": name, "price": price, "availability": availability })
-      }).then(response => {
-        if (response.ok) {
-          fetchInventory();
-          alert('Dish added to inventory.');
-        } else {
-          alert('Error adding dish.');
+  fetch('/orders')
+    .then(response => response.json())
+    .then(data => {
+      var orders = '';
+      orders += '<h3>Orders List</h3>';
+      data.forEach(order => {
+        orders += '<div class="order-item">';
+        orders += '<strong>Dish:</strong> ' + order.name + ' - <strong>Price:</strong> $' + order.price + ' - <strong>Status:</strong> ' + order.status;
+        orders += '<div class="rating">';
+        for (let i = 5; i >= 1; i--) {
+          orders += `<input type="radio" id="rating-${order.id}-${i}" name="rating-${order.id}" value="${i}" onclick="updateRating(${order.id}, ${i})"`;
+          if (order.rating && order.rating === i) {
+            orders += ' checked'; // Set the checked attribute for the pre-existing rating
+          }
+          orders += ' />';
+          orders += `<label for="rating-${order.id}-${i}"></label>`;
         }
-      }).catch(error => {
-        alert('Error adding dish.');
+        orders += '</div>';
+        orders += '</div>';
       });
+      document.getElementById('orders').innerHTML = orders;
     });
+}
 
-    // Place order
-    document.getElementById('placeOrderForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      var dishId = document.getElementById('dishId').value;
-      var customerName = document.getElementById('customerName').value;
+
+
+
+    function placeOrder(dishId){
       fetch('/sold/' + dishId, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+
         },
-        body: JSON.stringify({ "name": customerName })
+        body: JSON.stringify({ "name": "customerName" })
       }).then(response => response.text())
         .then(data => {
           if (data === 'order received!') {
@@ -217,73 +273,74 @@
         }).catch(error => {
           alert('Error placing order.');
         });
-    });
-
-    // Update order status
-    document.getElementById('updateOrderForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      var orderId = document.getElementById('orderId').value;
-      var status = document.getElementById('status').value;
-      fetch('/updateorders/' + orderId, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ "status": status })
-      }).then(response => response.json())
-        .then(data => {
-          if (data === 'order status updated.') {
-            fetchOrders();
-            alert('Order status updated successfully.');
-          } else {
-            alert(data);
-          }
-        }).catch(error => {
-          alert('Error updating order status.');
-        });
-    });
-
-    // Delete dish
-function deleteDish(dishId) {
-  fetch('/delete/' + dishId, {
-    method: 'DELETE'
-  }).then(response => {
-    if (response.ok) {
-      fetchInventory();
-      alert('Dish deleted successfully.');
-    } else {
-      alert('Error deleting dish.');
     }
-  }).catch(error => {
-    alert('Error deleting dish.');
-  });
-}
 
-// Update dish availability
-function updateAvailability(dishId, availability) {
-  var newAvailability = (availability === 'yes') ? 'no' : 'yes';
-  fetch('/update/' + dishId, {
+    function updateRating(orderId, rating) {
+  fetch(`/updaterating/${orderId}`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ "availability": newAvailability })
-  }).then(response => {
-    if (response.ok) {
-      fetchInventory();
-      alert('Dish availability updated successfully.');
-    } else {
-      alert('Error updating dish availability.');
-    }
-  }).catch(error => {
-    alert('Error updating dish availability.');
-  });
+    body: JSON.stringify({ "rating": rating })
+  })
+    .then(response => response.json())
+    .then(data => {
+      // Handle the response from the backend, if needed
+      console.log(data);
+    })
+    .catch(error => {
+      // Handle the error, if any
+      console.error(error);
+    });
 }
 
 
     // Initial fetch of inventory and orders
     fetchInventory();
     fetchOrders();
+  </script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+  <script type="text/javascript" charset="utf-8">
+    var socket = io();
+
+    socket.on('connect', function () {
+      const additionalData = {
+        token: localStorage.getItem("token")
+      };
+      socket.emit('connect_with_details', additionalData);
+    });
+
+    // Chatbox functionality
+    var chatboxBody = document.querySelector(".chatbox-body");
+    var chatInput = document.getElementById("chatInput");
+    var sendButton = document.getElementById("sendButton");
+    var chat = []
+
+    sendButton.addEventListener("click", sendMessage);
+
+    function sendMessage() {
+      var message = chatInput.value;
+      if (message.trim() !== "") {
+        var chatboxMessage = document.createElement("div");
+        chatboxMessage.className = "chatbox-message";
+        chatboxMessage.textContent = message;
+        chatboxBody.appendChild(chatboxMessage);
+        socket.emit('gpt', {"input": message, "chat": chat});
+        chatInput.value = "";
+        chatboxBody.scrollTop = chatboxBody.scrollHeight;
+      }
+    }
+
+    socket.on("gpt", (data)=>{
+      console.log(data)
+      var chatboxMessage = document.createElement("div");
+      chatboxMessage.className = "chatbox-message";
+      chatboxMessage.textContent = data.answer.content;
+      chatboxBody.appendChild(chatboxMessage);
+      chat = data.chat
+      chatboxBody.scrollTop = chatboxBody.scrollHeight;
+    })
   </script>
 </body>
 </html>

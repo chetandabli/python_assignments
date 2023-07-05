@@ -4,6 +4,7 @@ __pycache__/
 
 # Virtual environment
 .venv/
+.env
 
 # IDE and editor files
 .idea/
@@ -28,3 +29,5 @@ instance/
 # Miscellaneous
 .DS_Store
 Thumbs.db
+
+.env
