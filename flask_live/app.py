@@ -169,7 +169,7 @@ def login():
 
 
 @app.route('/data')
-@authentication_middleware
+# @authentication_middleware
 def data():
     res = restaurant.orders
     dist = [dish.__dict__() for dish in restaurant.check_inventory()]
