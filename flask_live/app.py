@@ -4,6 +4,9 @@ from flask_bcrypt import Bcrypt
 import jwt
 import os
 import openai
+from flask_pymongo import PyMongo
+from dotenv import load_dotenv
+load_dotenv()
 
 app = Flask(__name__)
 app.debug = True
@@ -11,6 +14,8 @@ secretKey = os.getenv("SUPER_SECRET_KEY")
 socketio = SocketIO(app)
 bcrypt = Bcrypt(app)
 openai.api_key = os.getenv("OPENAI_API_KEY")
+uri = os.getenv("MONGO_URI")
+mongo = PyMongo(app, uri)
 
 
 class Dish:
@@ -19,6 +24,13 @@ class Dish:
         self.id = id
         self.price = price
         self.availability = availability
+        self.rate = {
+            "1": 0,
+            "2": 0,
+            "3": 0,
+            "4": 0,
+            "5": 0
+        }
 
     def __dict__(self):
         return {
@@ -54,11 +66,19 @@ class Restaurant:
         return "Dish not found in inventory."
 
     def update(self, id, availability):
-        print(id)
         for singledish in self.inventory:
             if singledish.id == id:
                 singledish.availability = availability
                 return "Dish availability updated."
+        return "Dish not found in inventory."
+    
+    def update_review(self, rate, pre):
+        for singledish in self.inventory:
+            if singledish.id == id:
+                singledish.rating[rate] += 1
+                if pre:
+                    singledish.rating[pre] -= 1
+                return "Dish ratings updated."
         return "Dish not found in inventory."
 
     def neworder(self, id, name, orders_id):
@@ -67,6 +87,7 @@ class Restaurant:
                 if dish.availability == "yes":
                     order = {
                         "id": orders_id,
+                        "dish_id": id,
                         "customer_name": name,
                         "name": dish.name,
                         "price": dish.price,
@@ -94,8 +115,9 @@ class Restaurant:
     def update_rating(self, id, rate):
         for order in self.orders:
             if order['id'] == id:
+                pre = order['rating']
                 order['rating'] = rate
-                return "order rating updated."
+                return pre
         return "Order not found in orders."
 
 
@@ -113,9 +135,24 @@ restaurant = Restaurant(inventory, [])
 
 orders_id = 1
 
+def authentication_middleware(func):
+    def wrapper(*args, **kwargs):
+        token = request.headers.get("Authorization")
+        if not token or not token.startswith("Bearer "):
+            return jsonify({"error": "Invalid token"}), 404
+
+        provided_token = token.split(" ")[1]
+        decoded = jwt.decode(provided_token, secretKey, algorithms=["RS256"])
+        request.email = decoded.email
+        return func(*args, **kwargs)
+    return wrapper
+
 
 @app.route('/')
 def index():
+    data = mongo.db.books.find({})
+    x = list(data)
+    print(x)
     dist = [dish.__dict__() for dish in restaurant.check_inventory()]
     # return jsonify(dist)
     return render_template('index.html', inventory=dist)
@@ -132,6 +169,7 @@ def login():
 
 
 @app.route('/data')
+@authentication_middleware
 def data():
     res = restaurant.orders
     dist = [dish.__dict__() for dish in restaurant.check_inventory()]
@@ -187,17 +225,24 @@ def updateorders(orderid):
 def updaterating(orderid):
     x = request.get_json()
     res = restaurant.update_rating(int(orderid), x["rating"])
-    return jsonify(res)
+    if res != "Order not found in orders.":
+        restaurant.update_review(x["rating"], res)
+    else:
+        restaurant.update_review(x["rating"], 0)
+    return jsonify("res")
 
 
 # socket started
 
-connected_users = {}
+connected_users = 0
 
 
 @socketio.on('connect')
 def handle_connect():
-    print('Client connected')
+    global connected_users
+    connected_users += 1
+    print('Client connected', connected_users)
+    
 
 
 @socketio.on('connect_with_details')
@@ -208,7 +253,7 @@ def handle_connect_with_details(data):
         'additional_data': additional_data,  # Store the additional details
         # Add any other user information you want to track
     }
-    connected_users["socket_id"] = user_info
+    # connected_users["socket_id"] = user_info
     print('Client connected. Socket ID:', "socket_id")
 
 
@@ -269,7 +314,6 @@ def handle_chat(data):
 
     chat.append({"role": "user", "content": input})
 
-    print(chat)
     res = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=chat,

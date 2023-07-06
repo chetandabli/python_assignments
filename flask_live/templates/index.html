@@ -304,12 +304,12 @@
   <script type="text/javascript" charset="utf-8">
     var socket = io();
 
-    socket.on('connect', function () {
-      const additionalData = {
-        token: localStorage.getItem("token")
-      };
-      socket.emit('connect_with_details', additionalData);
-    });
+    // socket.on('connect', function () {
+    //   const additionalData = {
+    //     token: localStorage.getItem("token")
+    //   };
+    //   socket.emit('connect_with_details', additionalData);
+    // });
 
     // Chatbox functionality
     var chatboxBody = document.querySelector(".chatbox-body");
@@ -333,7 +333,6 @@
     }
 
     socket.on("gpt", (data)=>{
-      console.log(data)
       var chatboxMessage = document.createElement("div");
       chatboxMessage.className = "chatbox-message";
       chatboxMessage.textContent = data.answer.content;
