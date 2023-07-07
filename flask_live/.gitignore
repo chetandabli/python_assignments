@@ -31,3 +31,4 @@ instance/
 Thumbs.db
 
 .env
+.vercel
