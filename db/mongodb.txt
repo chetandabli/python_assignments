@@ -1,0 +1,102 @@
+db.Customers.insertOne({
+  id: 1,
+  name: "John Doe",
+  email: "johndoe@example.com",
+  address: "123 Main Street",
+  phone_number: "555-1234"
+});
+
+or 
+
+db.createCollection("Customers")
+
+db.Customers.insertMany([
+  {
+    id: 1,
+    name: 'John Doe',
+    email: 'johndoe@example.com',
+    address: '123 Main Street',
+    phone_number: '555-1234'
+  },
+  {
+    id: 2,
+    name: 'Jane Smith',
+    email: 'janesmith@example.com',
+    address: '456 Elm Avenue',
+    phone_number: '555-5678'
+  },
+  {
+    id: 3,
+    name: 'Mike Johnson',
+    email: 'mikejohnson@example.com',
+    address: '789 Oak Drive',
+    phone_number: '555-9012'
+  },
+  {
+    id: 4,
+    name: 'Emily Williams',
+    email: 'emilywilliams@example.com',
+    address: '987 Pine Lane',
+    phone_number: '555-3456'
+  },
+  {
+    id: 5,
+    name: 'David Brown',
+    email: 'davidbrown@example.com',
+    address: '654 Cedar Road',
+    phone_number: '555-7890'
+  }
+]);
+
+db.Customers.find({});
+
+db.Customers.find({}, { name: 1, email: 1 });
+
+db.Customers.find({id: 4});
+
+db.Customers.find({ name: { $regex: '^A' } });
+
+db.Customers.find({}).sort(-1);
+
+db.Customers.updateOne(
+  { id: 4 },
+  { $set: { address: 'New Address' } }
+);
+
+db.Customers.find({}).sort({id: 1}).limit(3);
+
+db.Customers.deleteMany({ age: { $gt: 30 } });
+db.Customers.findByIdAndDelete({ id: 4 });
+
+db.Customers.find({}).count();
+
+db.Customers.find({}).sort({ id: 1 }).skip(2);
+
+db.Customers.find({
+  id: { $gt: 2 },
+  name: { $regex: '^B' }
+});
+
+db.Customers.find({
+  $or: [
+    { id: { $lt: 3 } },
+    { name: { $regex: 's$' } }
+  ]
+});
+
+db.Customers.find({
+  $or: [
+    { phone_number: null },
+    { phone_number: { $exists: false } }
+  ]
+});
+
+
+
+
+
+
+
+
+
+

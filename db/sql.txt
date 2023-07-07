@@ -1,0 +1,43 @@
+CREATE TABLE Customers (
+  id INT PRIMARY KEY,
+  name VARCHAR(100),
+  email VARCHAR(100),
+  address VARCHAR(200),
+  phone_number VARCHAR(20)
+);
+
+INSERT INTO Customers (id, name, email, address, phone_number)
+VALUES
+  (1, 'John Doe', 'johndoe@example.com', '123 Main Street', '555-1234'),
+  (2, 'Jane Smith', 'janesmith@example.com', '456 Elm Avenue', '555-5678'),
+  (3, 'Mike Johnson', 'mikejohnson@example.com', '789 Oak Drive', '555-9012'),
+  (4, 'Emily Williams', 'emilywilliams@example.com', '987 Pine Lane', '555-3456'),
+  (5, 'David Brown', 'davidbrown@example.com', '654 Cedar Road', '555-7890');
+
+SELECT * FROM Customers;
+
+SELECT name, email FROM Customers;
+
+SELECT * FROM Customers where id == 3;
+
+SELECT * FROM Customers WHERE name LIKE 'A%';
+
+SELECT * FROM Customers order by name desc;
+
+UPDATE Customers SET address = 'New Address' WHERE id = 4;
+
+SELECT * FROM Customers ORDER BY name ASC LIMIT 3;
+
+DELETE FROM Customers WHERE id = 4;
+
+SELECT count(*) FROM Customers;
+
+SELECT * FROM Customers ORDER BY id ASC OFFSET 2;
+
+SELECT * FROM Customers WHERE id > 2 AND name LIKE 'B%';
+
+SELECT * FROM Customers WHERE id < 3 OR name LIKE '%s';
+
+SELECT * FROM Customers WHERE phone_number IS NULL OR phone_number = '';
+
+
