@@ -159,12 +159,12 @@ def index():
 
 
 @app.route('/login')
-def admin():
+def login():
     return render_template('login.html')
 
 
 @app.route('/admin')
-def login():
+def admin():
     return render_template('admin.html')
 
 
