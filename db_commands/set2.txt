@@ -1,0 +1,118 @@
+Problem 16:
+
+db.createCollection("Restaurants")
+
+CREATE TABLE Restaurants (
+    id INT PRIMARY KEY,
+    name VARCHAR(100),
+    cuisine_type VARCHAR(100),
+    location VARCHAR(255),
+    average_rating DECIMAL(3,2),
+    delivery_available BOOLEAN
+);
+
+
+Problem 17:
+
+db.Restaurants.insertMany([
+  {
+    id: 1,
+    name: "Restaurant A",
+    cuisine_type: "Italian",
+    location: "New York",
+    average_rating: 4.5,
+    delivery_available: true
+  },
+  {
+    id: 2,
+    name: "Restaurant B",
+    cuisine_type: "Chinese",
+    location: "San Francisco",
+    average_rating: 4.2,
+    delivery_available: false
+  },
+  {
+    id: 3,
+    name: "Restaurant C",
+    cuisine_type: "Mexican",
+    location: "Los Angeles",
+    average_rating: 4.8,
+    delivery_available: true
+  },
+  {
+    id: 4,
+    name: "Restaurant D",
+    cuisine_type: "Indian",
+    location: "Chicago",
+    average_rating: 3.9,
+    delivery_available: false
+  },
+  {
+    id: 5,
+    name: "Restaurant E",
+    cuisine_type: "Japanese",
+    location: "New York",
+    average_rating: 4.6,
+    delivery_available: true
+  }
+])
+
+INSERT INTO Restaurants (id, name, cuisine_type, location, average_rating, delivery_available) 
+VALUES 
+(1, 'Restaurant A', 'Italian', 'New York', 4.5, true),
+(2, 'Restaurant B', 'Chinese', 'San Francisco', 4.2, false),
+(3, 'Restaurant C', 'Mexican', 'Los Angeles', 4.8, true),
+(4, 'Restaurant D', 'Indian', 'Chicago', 3.9, false),
+(5, 'Restaurant E', 'Japanese', 'New York', 4.6, true);
+
+Problem 18:
+
+db.Restaurants.find().sort({ average_rating: -1 })
+
+SELECT * FROM Restaurants ORDER BY average_rating DESC;
+
+
+Problem 19:
+
+db.Restaurants.find({ delivery_available: true, average_rating: { $gt: 4 } })
+
+SELECT * FROM Restaurants WHERE delivery_available = true AND average_rating > 4;
+
+
+Problem 20:
+
+db.Restaurants.find({ $or: [{ cuisine_type: null }, { cuisine_type: { $exists: false } }] })
+
+SELECT * FROM Restaurants WHERE cuisine_type IS NULL;
+
+
+Problem 21:
+
+db.Restaurants.count({ delivery_available: true })
+
+SELECT COUNT(*) FROM Restaurants WHERE delivery_available = true;
+
+Problem 22:
+
+db.Restaurants.find({ location: /New York/ })
+
+SELECT * FROM Restaurants WHERE location LIKE '%New York%';
+
+Problem 23:
+
+db.Restaurants.aggregate([{ $group: { _id: null, average_rating: { $avg: "$average_rating" } } }])
+
+SELECT AVG(average_rating) AS average_rating FROM Restaurants;
+
+Problem 24:
+
+db.Restaurants.find().sort({ average_rating: -1 }).limit(5)
+
+SELECT * FROM Restaurants ORDER BY average_rating DESC LIMIT 5;
+
+
+Problem 25:
+
+db.Restaurants.deleteOne({ id: 3 })
+
+DELETE FROM Restaurants WHERE id = 3;

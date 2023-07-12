@@ -1,0 +1,123 @@
+Customers = {
+  "_id": ObjectId(), // a unique identifier created by MongoDB itself
+  "name": String,
+  "email": String,
+  "address": String,
+  "phone_number": String
+}
+
+CREATE TABLE Customers (
+    id INT PRIMARY KEY,
+    name VARCHAR(100),
+    email VARCHAR(100),
+    address VARCHAR(255),
+    phone_number VARCHAR(50)
+);
+
+Problem 1:
+CREATE TABLE Customers (
+    id INT PRIMARY KEY,
+    name VARCHAR(100),
+    email VARCHAR(100),
+    address VARCHAR(255),
+    phone_number VARCHAR(50)
+);
+
+db.createCollection("Customers")
+
+Problem 2:
+INSERT INTO Customers (name, email, address, phone_number) VALUES ("chetan", "chetan@gmail.com", "india", "6363288927")
+
+db.Customers.insertOne({
+    "name": "Chetan",
+    "email": "chetan@gmail.com",
+    "address": "india",
+    "phone_number": "6363288927"
+})
+
+Problem 3:
+SELECT * from Customers
+
+db.Customers.find({})
+
+Problem 4:
+SELECT name from Customers
+
+db.Customers.find({}, { name: 1, _id: 0 })
+
+Problem 5:
+SELECT * from Customers WHERE id = 3
+
+db.Customers.find({"id": 3})
+
+Problem 6:
+SELECT * from Customers WHERE name LIKE "A%"
+
+db.Customers.find({ name: { $regex: /^J/ } })
+
+Problem 7:
+SELECT * from Customers order by name desc
+
+db.Customers.find().sort({"name": -1})
+
+Problem 8:
+UPDATE Customers SET name = "Laxman" WHERE name = "chetan"
+
+db.Customers.updateOne({ "name": "chetan" }, { $set: { "name": "laxman" }})
+
+Problem 9:
+SELECT * FROM Customers order by name asc LIMIT 3
+
+db.Customers.find().sort({"name": 1}).limit(3)
+
+Problem 10:
+DELETE FROM Customers WHERE id = 2
+
+db.Customers.deleteOne({ "id": 2 })
+
+Problem 11:
+SELECT count(*) from Customers
+
+db.Customers.find({}).count()
+
+Problem 12:
+SELECT * FROM Customers LIMIT 10 OFFSET 5
+
+db.Customers.find({}).skip(5)
+
+Problem 13:
+SELECT * FROM Customers WHERE id > 2 AND name LIKE 'B%';
+
+db.Customers.find({
+  id: { $gt: 2 },
+  name: { $regex: '^B' }
+});
+
+Problem 14:
+SELECT * FROM Customers WHERE id < 3 OR name LIKE '%s';
+
+db.Customers.find({
+  $or: [
+    { id: { $lt: 3 } },
+    { name: { $regex: 's$' } }
+  ]
+});
+
+Problem 15:
+SELECT * FROM Customers WHERE phone_number IS NULL OR phone_number = '';
+
+db.Customers.find({
+  $or: [
+    { phone_number: null },
+    { phone_number: { $exists: false } }
+  ]
+});
+
+
+
+
+
+
+
+
+
