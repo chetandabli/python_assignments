@@ -76,7 +76,7 @@
 
         async function predict() {
             const prediction = await model.predict(webcam.canvas);
-            const labels = ["Person", "Mobile", "bottle"]; // Add more labels as needed
+            const labels = ["bottle", "Person", "Mobile"]; // Add more labels as needed
 
             for (let i = 0; i < maxPredictions; i++) {
                 const className = prediction[i].className;
