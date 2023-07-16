@@ -1,0 +1,58 @@
+<div class="container">
+  <h1>Restaurant Management</h1>
+
+  <h2>Inventory</h2>
+  <div id="inventory">
+    <div *ngFor="let dish of inventory">
+      <div class="listofdishes">
+        <strong>{{ dish.name }}</strong> - ${{ dish.price }} - Availability: {{ dish.availability }} - id: {{ dish.id }}
+        <button (click)="deleteDish(dish.id)">Delete</button>
+        <button (click)="updateAvailability(dish.id, dish.availability)">Update</button>
+      </div>
+    </div>
+  </div>
+
+  <h2>Add Dish</h2>
+  <form id="addDishForm" (submit)="addDish($event)">
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name" required><br>
+    <label for="price">Price:</label>
+    <input type="number" id="price" name="price" step="0.01" required><br>
+    <label for="availability">Availability:</label>
+    <select id="availability" name="availability" required>
+      <option value="yes">Yes</option>
+      <option value="no">No</option>
+    </select><br>
+    <button type="submit">Add Dish</button>
+  </form>
+
+  <h2>Place Order</h2>
+  <form id="placeOrderForm" (submit)="placeOrder($event)">
+    <label for="dishId">Dish ID:</label>
+    <input type="number" id="dishId" name="dishId" required><br>
+    <label for="customerName">Customer Name:</label>
+    <input type="text" id="customerName" name="customerName" required><br>
+    <button type="submit">Place Order</button>
+  </form>
+
+  <h2>Update Order Status</h2>
+  <form id="updateOrderForm" (submit)="updateOrderStatus($event)">
+    <label for="orderId">Order ID:</label>
+    <input type="number" id="orderId" name="orderId" required><br>
+    <label for="status">Status:</label>
+    <select id="status" name="status" required>
+      <option value="received">Received</option>
+      <option value="preparing">Preparing</option>
+      <option value="delivered">Delivered</option>
+      <option value="canceled">Canceled</option>
+    </select><br>
+    <button type="submit">Update Status</button>
+  </form>
+
+  <h2>Orders List</h2>
+  <div id="orders">
+    <div *ngFor="let order of orders">
+      <div><strong>Order ID:</strong> {{ order.id }} - <strong>Customer Name:</strong> {{ order.customer_name }} - <strong>Dish:</strong> {{ order.name }} - <strong>Price:</strong> ${{ order.price }} - <strong>Status:</strong> {{ order.status }}</div>
+    </div>
+  </div>
+</div>

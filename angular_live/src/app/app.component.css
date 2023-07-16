@@ -1,0 +1,90 @@
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+  }
+
+  .container {
+    min-width: 90vw;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+  }
+
+  h1 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  h2 {
+    margin-top: 30px;
+  }
+
+  form {
+    margin-top: 15px;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  input,
+  select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+
+  button {
+    background-color: #4CAF50;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background-color: #45a049;
+  }
+
+  #inventory {
+    margin-top: 20px;
+  }
+
+  #inventory > div {
+    margin-bottom: 5px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+
+  #orders {
+    margin-top: 20px;
+  }
+
+  #orders > div {
+    margin-bottom: 5px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  .listofdishes{
+      display: flex;
+      justify-content: space-between;
+  }
+  .listofdishes>strong{
+      padding-right: 5px;
+  }
