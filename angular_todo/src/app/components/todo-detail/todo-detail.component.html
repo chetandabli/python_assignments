@@ -1,0 +1,12 @@
+<h2>Todo Detail</h2>
+
+<div *ngIf="todoId !== null; else noTodo">
+  <h3>Todo ID: {{ todoId }}</h3>
+  <h4>Title: {{ todo?.title }}</h4>
+  <p>Description: {{ todo?.description }}</p>
+  <p>Completed: {{ todo?.completed ? 'Yes' : 'No' }}</p>
+</div>
+
+<ng-template #noTodo>
+  <p>No todo found.</p>
+</ng-template>
