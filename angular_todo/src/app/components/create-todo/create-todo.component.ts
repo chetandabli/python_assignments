@@ -16,7 +16,7 @@ export class CreateTodoComponent {
 
   addItem() {
     if (this.newItem && this.des) {
-      this.todoService.data.push({"id": this.todoService.data[this.todoService.data.length-1].id + 1, "title": this.newItem, "description": this.des, "completed": true});
+      this.todoService.data.push({"id": this.todoService.data[this.todoService.data.length-1].id + 1, "title": this.newItem, "description": this.des, "completed": false});
       this.newItem = '';
       this.des = '';
       console.log(this.todoService.data)
