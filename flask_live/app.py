@@ -6,9 +6,11 @@ import os
 import openai
 from flask_pymongo import PyMongo
 from dotenv import load_dotenv
+from flask_cors import CORS
 load_dotenv()
 
 app = Flask(__name__)
+CORS(app)
 app.debug = True
 secretKey = os.getenv("SUPER_SECRET_KEY")
 socketio = SocketIO(app)
@@ -16,7 +18,6 @@ bcrypt = Bcrypt(app)
 openai.api_key = os.getenv("OPENAI_API_KEY")
 uri = os.getenv("MONGO_URI")
 mongo = PyMongo(app, uri)
-
 
 class Dish:
     def __init__(self, name, id, price, availability):
