@@ -1,0 +1,11 @@
+<h1>InstaGram</h1>
+<!-- This nav gives you links to click, which tells the router which route to use (defined in the routes constant in  AppRoutingModule) -->
+<nav>
+  <ul>
+    <li><a routerLink="/postcreate" routerLinkActive="active" ariaCurrentWhenActive="page">Post Create</a></li>
+    <li><a routerLink="/postview" routerLinkActive="active" ariaCurrentWhenActive="page">Post View</a></li>
+    <li><a routerLink="/postdelete" routerLinkActive="active" ariaCurrentWhenActive="page">Post Delete</a></li>
+  </ul>
+</nav>
+<!-- The routed views render in the <router-outlet>-->
+<router-outlet></router-outlet>
