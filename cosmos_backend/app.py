@@ -9,10 +9,12 @@ from flask_bcrypt import Bcrypt
 import jwt
 import time
 from datetime import datetime
+from flask_cors import CORS
 
 app = Flask(__name__)
 load_dotenv()
 bcrypt = Bcrypt(app)
+CORS(app)
 
 admin_email = os.getenv("ADMIN_EMAIL")
 admin_password = os.getenv("ADMIN_PASSWORD")
