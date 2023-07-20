@@ -2,12 +2,13 @@ from flask import Flask, request, jsonify
 import openai
 import os
 from dotenv import load_dotenv
-from sqlalchemy import create_engine, Column, Integer, String, Boolean, ForeignKey, Text
+from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, Text
 from sqlalchemy.orm import sessionmaker, relationship
 import json
 from flask_bcrypt import Bcrypt
 import jwt
 import time
+from datetime import datetime
 
 app = Flask(__name__)
 load_dotenv()
@@ -45,6 +46,7 @@ class UserChat(Base):
     user_id = Column(Integer, nullable=False)
     chat_thread = Column(Text, nullable=False)
     is_feedback_given = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
 
 class Feedback(Base):
     __tablename__ = 'feedbacks'
@@ -59,31 +61,29 @@ Base.metadata.create_all(engine)
 
 @app.before_request
 def check_authorization():
-    if request.endpoint in ["user_question", "user_chat-history_<int:user_id>"]:
+    if request.endpoint in ["user_question", "user_chat_history"]:
         if not request.headers.get("Authorization"):
             return "Unauthorized", 401
         else:
             try:
                 payload = jwt.decode(request.headers.get("Authorization"), secretKey, algorithms=["HS256"])
                 email = payload["email"]
+                id = payload["user_id"]
                 request.environ["email_from_token"] = email
+                request.environ["user_id_from_token"] = id
             except jwt.ExpiredSignatureError:
                 return "JWT token has expired.", 401
             except Exception as e:
                 print(e)
                 return "Invalid JWT token.", 401
-    elif request.endpoint in ["admin_chat", "/admin_feedback"]:
+    elif request.endpoint in ["admin_get_chat", "admin_feedback", "admin_all_feedback"]:
         if not request.headers.get("Authorization"):
             return "Unauthorized", 401
         else:
             try:
                 payload = jwt.decode(request.headers.get("Authorization"), secretKeyADMIN, algorithms=["HS256"])
                 email = payload["email"]
-
-                if request.data is not None:
-                    request.data.update({"email": email})
-                else:
-                    request.data = {"email": email}
+                request.environ["email_from_token"] = email    
             except jwt.ExpiredSignatureError:
                 return "JWT token has expired.", 401
             except Exception as e:
@@ -113,8 +113,8 @@ def login():
         if isCorrectPassword:
              expiration_timestamp = int(time.time()) + expiration_time_seconds
              encoded_jwt = jwt.encode(
-                {"email": data["email"], "exp": expiration_timestamp}, secretKey, algorithm="HS256")
-             return jsonify({"message": "Login successful!", "user_id": user.id, "token": encoded_jwt}), 200
+                {"email": data["email"],"user_id": user.id, "exp": expiration_timestamp}, secretKey, algorithm="HS256")
+             return jsonify({"message": "Login successful!", "user_id": user.id, "name": user.name, "token": encoded_jwt}), 200
         else:
             return jsonify({"error": "Invalid credentials"}), 401
         
@@ -131,27 +131,35 @@ def admin_login():
         return jsonify({"message": "Admin login successful!", "token": encoded_jwt}), 200
     return jsonify({"error": "Invalid credentials"}), 401
 
-# User Question Route with User Chat ID
 @app.route('/user/question', methods=['POST'])
 def user_question():
-    email = request.environ.get("email_from_token")
+    email_from_token = request.environ.get("email_from_token")
     data = request.json
-    user_id = data["user_id"]
-    user_chat_id = data["user_chat_id"]
+    user_id = request.environ.get("user_id_from_token")
+    user_chat_id = data.get("user_chat_id")  # Use get() to handle the case when user_chat_id is not provided
     question = data["question"]
     session = Session()
+
+    # If user_chat_id is not provided, create a new UserChat entry
+    if not user_chat_id:
+        new_user_chat = UserChat(user_id=user_id, chat_thread="[]")  # Initialize an empty chat_thread
+        session.add(new_user_chat)
+        session.commit()
+        user_chat_id = new_user_chat.id  # Use the generated user_chat_id
+
     user_chat = session.query(UserChat).filter_by(id=user_chat_id, user_id=user_id).first()
 
     if user_chat:
         chat_thread = json.loads(user_chat.chat_thread)
         chat_thread.insert(0, {"role": "system", "content": base_prompt})
-        chat_thread.append({"role": "user", "message": question})
+        chat_thread.append({"role": "user", "content": question})
 
         # Perform the GPT-3 completion as before
         completion = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=chat_thread
         )
+        print(completion)
         chat_thread.append(completion.choices[0].message)
         chat_thread.pop(0)
 
@@ -161,13 +169,15 @@ def user_question():
         return jsonify({"message": "Question sent successfully!", "response": completion.choices[0].message}), 200
     else:
         session.close()
-        return jsonify({"error": "User chat not found"}), 404
+        return jsonify({"error": "Something not found"}), 404
     
 # User Chat History Get Route
-@app.route('/user/chat-history/<int:user_id>', methods=['GET'])
-def user_chat_history(user_id):
+@app.route('/user/chat-history', methods=['GET'])
+def user_chat_history():
+    email_from_token = request.environ.get("email_from_token")
+    user_id_from_token = request.environ.get("user_id_from_token")
     session = Session()
-    user_chats_history = session.query(UserChat).filter_by(user_id=user_id).all()
+    user_chats_history = session.query(UserChat).filter_by(user_id=user_id_from_token).all()
     session.close()
     user_chats_history = [
         {
@@ -201,22 +211,65 @@ def admin_get_chat():
 @app.route('/admin/feedback', methods=['POST'])
 def admin_feedback():
     data = request.json
-    user_chat_id = data["user_chat_id"]
-    rating = data["rating"]
-    comment = data["comment"]
+    user_chat_id = data.get("user_chat_id")
+    rating = data.get("rating")
+    comment = data.get("comment")
+
+    if user_chat_id is None:
+        return jsonify({"error": "User chat id found"}), 404
 
     session = Session()
     user_chat = session.query(UserChat).filter_by(id=user_chat_id).first()
     if user_chat:
-        user_chat.is_feedback_given = True
-        feedback = Feedback(user_chat_id=user_chat_id, rating=rating, comment=comment)
-        session.add(feedback)
+        if rating is not None and comment is not None:
+            user_chat.is_feedback_given = True
+            feedback = Feedback(user_chat_id=user_chat_id, rating=rating, comment=comment)
+            session.add(feedback)
+        elif rating is not None:
+            user_chat.is_feedback_given = True
+            feedback = Feedback(user_chat_id=user_chat_id, rating=rating, comment ="")
+            session.add(feedback)
+        elif comment is not None:
+            user_chat.is_feedback_given = True
+            feedback = Feedback(user_chat_id=user_chat_id, rating=0, comment=comment)
+            session.add(feedback)
+        else:
+            # In case neither rating nor comment is provided, we can return an error or take appropriate action.
+            # For now, I'll just return a message indicating that at least one of them should be provided.
+            return jsonify({"error": "Please provide at least a rating or a comment."}), 400
+
         session.commit()
         session.close()
         return jsonify({"message": "Feedback submitted successfully!"}), 200
     else:
         session.close()
         return jsonify({"error": "User chat not found"}), 404
+    
+@app.route('/admin/all-feedback', methods=['GET'])
+def admin_all_feedback():
+    session = Session()
+    feedback_data = session.query(Feedback).all()
+    session.close()
+
+    feedback_with_chat_thread = []
+    for feedback in feedback_data:
+        user_chat_id = feedback.user_chat_id
+        user_chat = session.query(UserChat).filter_by(id=user_chat_id).first()
+        if user_chat:
+            feedback_with_chat_thread.append({
+                "user_chat_id": user_chat_id,
+                "rating": feedback.rating,
+                "comment": feedback.comment,
+                "chat_thread": json.loads(user_chat.chat_thread),
+            })
+        else:
+            # Handle the case where the user chat associated with the feedback is not found.
+            # You can take appropriate action here, like skipping the feedback or logging the issue.
+            pass
+
+    return jsonify(feedback_with_chat_thread), 200
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
