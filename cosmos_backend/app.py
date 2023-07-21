@@ -9,12 +9,14 @@ from flask_bcrypt import Bcrypt
 import jwt
 import time
 from datetime import datetime
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
 load_dotenv()
+CORS(app, origins="*", supports_credentials=True, allow_headers=["Content-Type", "Authorization"], expose_headers=["Content-Type"])
+
+# CORS(app, "origins": "http://localhost:4200")
 bcrypt = Bcrypt(app)
-CORS(app)
 
 admin_email = os.getenv("ADMIN_EMAIL")
 admin_password = os.getenv("ADMIN_PASSWORD")
@@ -64,6 +66,7 @@ Base.metadata.create_all(engine)
 @app.before_request
 def check_authorization():
     if request.endpoint in ["user_question", "user_chat_history"]:
+        print(request.headers.get("Authorization"))
         if not request.headers.get("Authorization"):
             return "Unauthorized", 401
         else:
@@ -90,6 +93,7 @@ def check_authorization():
                 return "JWT token has expired.", 401
             except Exception as e:
                 return "Invalid JWT token.", 401
+
 
 # User Signup
 @app.route('/signup', methods=['POST'])
@@ -133,6 +137,11 @@ def admin_login():
         return jsonify({"message": "Admin login successful!", "token": encoded_jwt}), 200
     return jsonify({"error": "Invalid credentials"}), 401
 
+@app.route('/user/question', methods=['OPTIONS'])
+@cross_origin(headers=["Content-Type", "Authorization"])
+def preflight_user_question():
+    return '', 204
+
 @app.route('/user/question', methods=['POST'])
 def user_question():
     email_from_token = request.environ.get("email_from_token")
@@ -168,18 +177,24 @@ def user_question():
         user_chat.chat_thread = json.dumps(chat_thread)
         session.commit()
         session.close()
-        return jsonify({"message": "Question sent successfully!", "response": completion.choices[0].message}), 200
+        return jsonify({"message": "Question sent successfully!", "response": chat_thread}), 200
     else:
         session.close()
         return jsonify({"error": "Something not found"}), 404
     
+@app.route('/user/chat-history', methods=['OPTIONS'])
+@cross_origin(headers=["Content-Type", "Authorization"])
+def preflight_chat_history():
+    return '', 204
+    
 # User Chat History Get Route
 @app.route('/user/chat-history', methods=['GET'])
+@cross_origin(origin="http://localhost:4200")
 def user_chat_history():
     email_from_token = request.environ.get("email_from_token")
     user_id_from_token = request.environ.get("user_id_from_token")
     session = Session()
-    user_chats_history = session.query(UserChat).filter_by(user_id=user_id_from_token).all()
+    user_chats_history = session.query(UserChat).filter_by(user_id=user_id_from_token).order_by(UserChat.id.desc()).all()
     session.close()
     user_chats_history = [
         {
@@ -190,6 +205,7 @@ def user_chat_history():
         }
         for user_chat in user_chats_history
     ]
+    
     return jsonify(user_chats_history), 200
 
 # Admin Get Chat Route (Chat Threads without Feedback)
