@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, make_response
 import openai
 import os
 from dotenv import load_dotenv
@@ -11,13 +11,11 @@ import time
 from datetime import datetime
 from flask_cors import CORS, cross_origin
 from functools import wraps
-from flask import make_response
 
 app = Flask(__name__)
 load_dotenv()
 CORS(app)
 
-# CORS(app, "origins": "http://localhost:4200")
 bcrypt = Bcrypt(app)
 
 admin_email = os.getenv("ADMIN_EMAIL")
@@ -68,7 +66,7 @@ def handle_preflight_request(f):
     def decorated_function(*args, **kwargs):
         # Create a response with 204 status code (No Content)
         response = make_response()
-        response.status_code = 204
+        response.status_code = 200
 
         # Add the necessary CORS headers to the response
         response.headers.add("Access-Control-Allow-Origin", "*")
@@ -83,7 +81,7 @@ def handle_preflight_request(f):
 @cross_origin()
 @handle_preflight_request
 def handle_global_options():
-    return '', 204
+    return '', 200
 
 # middleware
 
