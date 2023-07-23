@@ -83,7 +83,7 @@ def handle_preflight_request(f):
 @cross_origin()
 @handle_preflight_request
 def handle_global_options():
-    return ''
+    return '', 204
 
 # middleware
 
