@@ -3,7 +3,7 @@ import openai
 import os
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, Text
-from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.orm import sessionmaker, relationship, load_only
 import json
 from flask_bcrypt import Bcrypt
 import jwt
@@ -158,7 +158,7 @@ def user_question():
         session.commit()
         user_chat_id = new_user_chat.id  # Use the generated user_chat_id
 
-    user_chat = session.query(UserChat).filter_by(id=user_chat_id, user_id=user_id).first()
+    user_chat = session.query(UserChat).options(load_only('chat_thread')).filter_by(id=user_chat_id, user_id=user_id).first()
 
     if user_chat:
         chat_thread = json.loads(user_chat.chat_thread)
@@ -170,14 +170,18 @@ def user_question():
             model="gpt-3.5-turbo",
             messages=chat_thread
         )
-        print(completion)
         chat_thread.append(completion.choices[0].message)
         chat_thread.pop(0)
 
         user_chat.chat_thread = json.dumps(chat_thread)
         session.commit()
         session.close()
-        return user_chat, 200
+
+        response_data = {
+        "id": user_chat.id,
+        "chat_thread": user_chat.chat_thread,
+    }
+        return jsonify(response_data), 200
     else:
         session.close()
         return jsonify({"error": "Something not found"}), 404
@@ -199,7 +203,6 @@ def user_chat_history():
     user_chats_history = [
         {
             "id": user_chat.id,
-            "user_id": user_chat.user_id,
             "chat_thread": json.loads(user_chat.chat_thread),  # Deserialize the JSON data
             "is_feedback_given": user_chat.is_feedback_given
         }
