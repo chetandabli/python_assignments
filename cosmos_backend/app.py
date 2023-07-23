@@ -177,7 +177,7 @@ def user_question():
         user_chat.chat_thread = json.dumps(chat_thread)
         session.commit()
         session.close()
-        return jsonify({"message": "Question sent successfully!", "response": user_chat}), 200
+        return user_chat, 200
     else:
         session.close()
         return jsonify({"error": "Something not found"}), 404
