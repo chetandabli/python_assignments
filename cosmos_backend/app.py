@@ -129,7 +129,7 @@ def login():
         return jsonify({"error": "Invalid credentials"}), 401
 
 # Admin Login
-@app.route('/admin-login', methods=['POST'])
+@app.route('/admin_login', methods=['POST'])
 def admin_login():
     data = request.json
     if admin["email"] == data["email"] and admin["password"] == data["password"]:
@@ -193,7 +193,7 @@ def user_question():
 #     return '', 204
     
 # User Chat History Get Route
-@app.route('/user/chat-history', methods=['GET'])
+@app.route('/user/chat_history', methods=['GET'])
 def user_chat_history():
     email_from_token = request.environ.get("email_from_token")
     user_id_from_token = request.environ.get("user_id_from_token")
