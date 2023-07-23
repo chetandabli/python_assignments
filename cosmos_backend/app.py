@@ -64,6 +64,7 @@ Base.metadata.create_all(engine)
 # middleware
 
 @app.before_request
+@cross_origin(origin="*")
 def check_authorization():
     if request.endpoint in ["user_question", "user_chat_history"]:
         print(request.headers.get("Authorization"))
@@ -97,6 +98,7 @@ def check_authorization():
 
 # User Signup
 @app.route('/signup', methods=['POST'])
+@cross_origin(origin="*")
 def signup():
     data = request.json
     pw_hash = bcrypt.generate_password_hash(data["password"])
@@ -109,6 +111,7 @@ def signup():
 
 # User Login
 @app.route('/login', methods=['POST'])
+@cross_origin(origin="*")
 def login():
     data = request.json
     session = Session()
@@ -129,6 +132,7 @@ def login():
 
 # Admin Login
 @app.route('/admin-login', methods=['POST'])
+@cross_origin(origin="*")
 def admin_login():
     data = request.json
     if admin["email"] == data["email"] and admin["password"] == data["password"]:
@@ -143,6 +147,7 @@ def preflight_user_question():
     return '', 204
 
 @app.route('/user/question', methods=['POST'])
+@cross_origin(origin="*")
 def user_question():
     email_from_token = request.environ.get("email_from_token")
     data = request.json
@@ -193,7 +198,7 @@ def preflight_chat_history():
     
 # User Chat History Get Route
 @app.route('/user/chat-history', methods=['GET'])
-@cross_origin(origin="http://localhost:4200")
+@cross_origin(origin="*")
 def user_chat_history():
     email_from_token = request.environ.get("email_from_token")
     user_id_from_token = request.environ.get("user_id_from_token")
@@ -213,6 +218,7 @@ def user_chat_history():
 
 # Admin Get Chat Route (Chat Threads without Feedback)
 @app.route('/admin/chat', methods=['GET'])
+@cross_origin(origin="*")
 def admin_get_chat():
     session = Session()
     chat_threads_without_feedback = session.query(UserChat).filter_by(is_feedback_given=False).all()
@@ -230,6 +236,7 @@ def admin_get_chat():
 
 # Admin Feedback Route
 @app.route('/admin/feedback', methods=['POST'])
+@cross_origin(origin="*")
 def admin_feedback():
     data = request.json
     user_chat_id = data.get("user_chat_id")
@@ -267,6 +274,7 @@ def admin_feedback():
         return jsonify({"error": "User chat not found"}), 404
     
 @app.route('/admin/all-feedback', methods=['GET'])
+@cross_origin(origin="*")
 def admin_all_feedback():
     session = Session()
     feedback_data = session.query(Feedback).all()
