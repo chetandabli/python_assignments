@@ -10,10 +10,12 @@ import jwt
 import time
 from datetime import datetime
 from flask_cors import CORS, cross_origin
+from functools import wraps
+from flask import make_response
 
 app = Flask(__name__)
 load_dotenv()
-CORS(app, origins="*", supports_credentials=True, allow_headers=["Content-Type", "Authorization"], expose_headers=["Content-Type"])
+CORS(app)
 
 # CORS(app, "origins": "http://localhost:4200")
 bcrypt = Bcrypt(app)
@@ -60,6 +62,28 @@ class Feedback(Base):
     comment = Column(String(200))
 
 Base.metadata.create_all(engine)
+
+def handle_preflight_request(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # Create a response with 204 status code (No Content)
+        response = make_response()
+        response.status_code = 204
+
+        # Add the necessary CORS headers to the response
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        response.headers.add("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+        return response
+
+    return decorated_function
+
+@app.route('/', methods=['OPTIONS'])
+@cross_origin()
+@handle_preflight_request
+def handle_global_options():
+    return ''
 
 # middleware
 
@@ -137,10 +161,10 @@ def admin_login():
         return jsonify({"message": "Admin login successful!", "token": encoded_jwt}), 200
     return jsonify({"error": "Invalid credentials"}), 401
 
-@app.route('/user/question', methods=['OPTIONS'])
-@cross_origin(headers=["Content-Type", "Authorization"])
-def preflight_user_question():
-    return '', 204
+# @app.route('/user/question', methods=['OPTIONS'])
+# @cross_origin(headers=["Content-Type", "Authorization"])
+# def preflight_user_question():
+#     return '', 204
 
 @app.route('/user/question', methods=['POST'])
 def user_question():
@@ -186,10 +210,10 @@ def user_question():
         session.close()
         return jsonify({"error": "Something not found"}), 404
     
-@app.route('/user/chat-history', methods=['OPTIONS'])
-@cross_origin(headers=["Content-Type", "Authorization"])
-def preflight_chat_history():
-    return '', 204
+# @app.route('/user/chat-history', methods=['OPTIONS'])
+# @cross_origin(headers=["Content-Type", "Authorization"])
+# def preflight_chat_history():
+#     return '', 204
     
 # User Chat History Get Route
 @app.route('/user/chat-history', methods=['GET'])
