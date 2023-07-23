@@ -12,8 +12,8 @@ from datetime import datetime
 from flask_cors import CORS, cross_origin
 from functools import wraps
 
-app = Flask(__name__)
 load_dotenv()
+app = Flask(__name__)
 CORS(app)
 
 bcrypt = Bcrypt(app)
@@ -61,34 +61,13 @@ class Feedback(Base):
 
 Base.metadata.create_all(engine)
 
-def handle_preflight_request(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        # Create a response with 204 status code (No Content)
-        response = make_response()
-        response.status_code = 200
-
-        # Add the necessary CORS headers to the response
-        response.headers.add("Access-Control-Allow-Origin", "*")
-        response.headers.add("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        response.headers.add("Access-Control-Allow-Headers", "Content-Type, Authorization")
-
-        return response
-
-    return decorated_function
-
-@app.route('/', methods=['OPTIONS'])
-@cross_origin()
-@handle_preflight_request
-def handle_global_options():
-    return '', 200
-
 # middleware
 
 @app.before_request
 def check_authorization():
+    # if(request.method == "OPTIONS"):
+    #     return "", 204
     if request.endpoint in ["user_question", "user_chat_history"]:
-        print(request.headers.get("Authorization"))
         if not request.headers.get("Authorization"):
             return "Unauthorized", 401
         else:
