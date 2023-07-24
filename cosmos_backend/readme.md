@@ -90,11 +90,11 @@ The application implements a middleware function `check_authorization()` to ensu
 
 The application uses SQLAlchemy to define the following database models:
 
+<a href="https://freeimage.host/i/HQlFTYB"><img src="https://iili.io/HQlFTYB.md.png" alt="HQlFTYB.md.png" border="0"></a>
+
 1. `User`: Represents a user account with attributes `id`, `name`, `email`, `password`, and `profile_image`.
 2. `UserChat`: Represents a user chat thread with attributes `id`, `user_id`, `chat_thread`, `is_feedback_given`, and `created_at`.
 3. `Feedback`: Represents user feedback with attributes `id`, `user_chat_id`, `rating`, and `comment`.
-
-<a href="https://ibb.co/D86fK4Q"><img src="https://i.ibb.co/F0f476z/ER.png" alt="ER" border="0" /></a>
 
 ## Note
 
