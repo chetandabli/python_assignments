@@ -14,6 +14,7 @@ from functools import wraps
 
 load_dotenv()
 app = Flask(__name__)
+app.config['CORS_HEADERS'] = 'Content-Type'
 CORS(app)
 
 bcrypt = Bcrypt(app)
@@ -61,12 +62,20 @@ class Feedback(Base):
 
 Base.metadata.create_all(engine)
 
+def _build_cors_preflight_response():
+    response = make_response()
+    response.status_code = 200
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add('Access-Control-Allow-Headers', "*")
+    response.headers.add('Access-Control-Allow-Methods', "*")
+    return response
+
 # middleware
 
 @app.before_request
 def check_authorization():
-    # if(request.method == "OPTIONS"):
-    #     return "", 204
+    if request.method == "OPTIONS": # CORS preflight
+        return _build_cors_preflight_response()
     if request.endpoint in ["user_question", "user_chat_history"]:
         if not request.headers.get("Authorization"):
             return "Unauthorized", 401
@@ -139,9 +148,8 @@ def admin_login():
     return jsonify({"error": "Invalid credentials"}), 401
 
 # @app.route('/user/question', methods=['OPTIONS'])
-# @cross_origin(headers=["Content-Type", "Authorization"])
 # def preflight_user_question():
-#     return '', 204
+#     return _build_cors_preflight_response()
 
 @app.route('/user/question', methods=['POST'])
 def user_question():
@@ -159,7 +167,7 @@ def user_question():
         session.commit()
         user_chat_id = new_user_chat.id  # Use the generated user_chat_id
 
-    user_chat = session.query(UserChat).options(load_only('chat_thread')).filter_by(id=user_chat_id, user_id=user_id).first()
+    user_chat = session.query(UserChat).options(load_only(UserChat.chat_thread)).filter_by(id=user_chat_id, user_id=user_id).first()
 
     if user_chat:
         chat_thread = json.loads(user_chat.chat_thread)
@@ -176,11 +184,10 @@ def user_question():
 
         user_chat.chat_thread = json.dumps(chat_thread)
         session.commit()
-        session.close()
 
         response_data = {
         "id": user_chat.id,
-        "chat_thread": user_chat.chat_thread,
+        "chat_thread": json.loads(user_chat.chat_thread),
     }
         return jsonify(response_data), 200
     else:
