@@ -21,6 +21,7 @@ To run the application on your local machine, follow these steps:
     CONNECTION_STRING_MYSQL=<mysql-connection-string>
     SUPER_SECRET_KEY=<secret-key>
     SUPER_SECRET_KEY_ADMIN=<admin-secret-key>
+    final_chat=<fine tune the answer prompt>
     ```
 
    Replace the placeholders (`<...>`) with your actual values.
@@ -47,7 +48,7 @@ The application provides the following endpoints:
 
 ### Admin Endpoints
 
-1. **Admin Log In**: `/admin-login` [POST]
+1. **Admin Log In**: `/admin_login` [POST]
    - Log in as an admin user and receive a JWT token.
    - Request Body: `{"email": "admin-email", "password": "admin-password"}`
    - Response: `{"message": "Admin login successful!", "token": "jwt-token"}`
@@ -63,7 +64,7 @@ The application provides the following endpoints:
    - Request Body: `{"user_chat_id": 1, "rating": 4, "comment": "feedback-comment"}`
    - Response: `{"message": "Feedback submitted successfully!"}`
 
-4. **Get All Feedback**: `/admin/all-feedback` [GET]
+4. **Get All Feedback**: `/admin/all_feedback` [GET]
    - Retrieve all feedback along with the associated chat thread.
    - Requires Admin JWT token in the Authorization header.
    - Response: `{"feedback_with_chat_thread": [...]}`
@@ -76,7 +77,7 @@ The application provides the following endpoints:
    - Request Body: `{"user_chat_id": 1, "question": "user-question"}`
    - Response: `{"message": "Question sent successfully!", "response": "bot-response"}`
 
-2. **Get User Chat History**: `/user/chat-history` [GET]
+2. **Get User Chat History**: `/user/chat_history` [GET]
    - Retrieve the chat history for the current user.
    - Requires User JWT token in the Authorization header.
    - Response: `{"user_chat_history": [...]}`
