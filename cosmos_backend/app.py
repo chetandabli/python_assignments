@@ -22,9 +22,10 @@ bcrypt = Bcrypt(app)
 admin_email = os.getenv("ADMIN_EMAIL")
 admin_password = os.getenv("ADMIN_PASSWORD")
 base_prompt = os.getenv("BASE_INSTRUCTIONS")
+final_prompt = os.getenv("final_chat")
 openai.api_key = os.getenv("OPENAI_API_KEY")
 connection_string = os.getenv("CONNECTION_STRING_MYSQL")
-engine = create_engine(connection_string, echo=True)
+engine = create_engine(connection_string, echo=True, connect_args={'connect_timeout': 60})
 Session = sessionmaker(bind=engine)
 secretKey = os.getenv("SUPER_SECRET_KEY")
 secretKeyADMIN = os.getenv("SUPER_SECRET_KEY_ADMIN")
@@ -158,41 +159,66 @@ def user_question():
     user_id = request.environ.get("user_id_from_token")
     user_chat_id = data.get("user_chat_id")  # Use get() to handle the case when user_chat_id is not provided
     question = data["question"]
-    session = Session()
 
     # If user_chat_id is not provided, create a new UserChat entry
     if not user_chat_id:
+        session = Session()
         new_user_chat = UserChat(user_id=user_id, chat_thread="[]")  # Initialize an empty chat_thread
         session.add(new_user_chat)
         session.commit()
         user_chat_id = new_user_chat.id  # Use the generated user_chat_id
-
-    user_chat = session.query(UserChat).options(load_only(UserChat.chat_thread)).filter_by(id=user_chat_id, user_id=user_id).first()
-
-    if user_chat:
-        chat_thread = json.loads(user_chat.chat_thread)
-        chat_thread.insert(0, {"role": "system", "content": base_prompt})
-        chat_thread.append({"role": "user", "content": question})
-
-        # Perform the GPT-3 completion as before
-        completion = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=chat_thread
-        )
-        chat_thread.append(completion.choices[0].message)
-        chat_thread.pop(0)
-
-        user_chat.chat_thread = json.dumps(chat_thread)
-        session.commit()
-
-        response_data = {
-        "id": user_chat.id,
-        "chat_thread": json.loads(user_chat.chat_thread),
-    }
-        return jsonify(response_data), 200
-    else:
         session.close()
-        return jsonify({"error": "Something not found"}), 404
+
+    chat_thread = [{"role": "system", "content": base_prompt}]
+
+    if user_chat_id:
+        session = Session()
+        user_chat = session.query(UserChat).options(load_only(UserChat.chat_thread)).filter_by(id=user_chat_id, user_id=user_id).first()
+        if user_chat:
+            chat_thread = json.loads(user_chat.chat_thread)
+        session.close()
+
+    chat_thread.append({"role": "user", "content": question})
+
+    # Perform the first GPT-3 completion to get the initial response
+    completion = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=chat_thread,
+    )
+    initial_response = completion.choices[0].message["content"]
+
+    # Create a new chat_thread with the initial response for the second GPT-3 completion
+    chat_thread_with_response = chat_thread.copy()
+    chat_thread_with_response.append({"role": "assistant", "content": initial_response})
+    chat_thread_with_response.append({"role": "user", "content": final_prompt})
+
+    # Perform the second GPT-3 completion with the initial response
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=chat_thread_with_response,
+    )
+
+    # Update the chat_thread attribute with the final response and commit the changes
+    final_response_content = response.choices[0].message["content"]
+    chat_thread_with_response[-2]["content"] = final_response_content
+    chat_thread_with_response.pop(-1)
+
+    session = Session()
+    user_chat = session.query(UserChat).filter_by(id=user_chat_id, user_id=user_id).first()
+    if user_chat:
+        user_chat.chat_thread = json.dumps(chat_thread_with_response)
+        session.commit()
+    session.close()
+
+    # Return only the user_chat_id and chat_thread in the response
+    response_data = {
+        "id": user_chat_id,
+        "chat_thread": chat_thread_with_response,
+    }
+    return jsonify(response_data), 200
+
+
+
     
 # @app.route('/user/chat-history', methods=['OPTIONS'])
 # @cross_origin(headers=["Content-Type", "Authorization"])
