@@ -94,7 +94,7 @@ The application uses SQLAlchemy to define the following database models:
 2. `UserChat`: Represents a user chat thread with attributes `id`, `user_id`, `chat_thread`, `is_feedback_given`, and `created_at`.
 3. `Feedback`: Represents user feedback with attributes `id`, `user_chat_id`, `rating`, and `comment`.
 
-<a href="https://ibb.co/D86fK4Q"><img src="https://i.ibb.co/F0f476z/ER.png" alt="ER" border="0"></a><br /><a target='_blank' href='https://imgbb.com/'>editor de fotos tumblr</a><br />
+<a href="https://ibb.co/D86fK4Q"><img src="https://i.ibb.co/F0f476z/ER.png" alt="ER" border="0" /></a>
 
 ## Note
 
